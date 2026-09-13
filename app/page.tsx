@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { StatCard } from "../components/StatCard";
 import { CharterCard } from "../components/CharterCard";
 import { Input } from "../components/Input";
+import { SubgraphData, MintResult, Charter } from "../types";
 
 const STATS_QUERY = gql`
   query {
@@ -30,14 +31,14 @@ const STATS_QUERY = gql`
 `;
 
 export default function Dashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<SubgraphData | null>(null);
   const [status, setStatus] = useState<string>("");
   const [walletAddress, setWalletAddress] = useState<string>("0x1234567890123456789012345678901234567890");
   const [domain, setDomain] = useState<string>("inference");
   const [budgetHbar, setBudgetHbar] = useState<string>("1");
   const [durationDays, setDurationDays] = useState<string>("7");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [mintResult, setMintResult] = useState<any>(null);
+  const [mintResult, setMintResult] = useState<MintResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function Dashboard() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "#f8fafc", padding: 32 }}>
+    <main style={{ minHeight: "100vh", background: "#f8fafc", padding: 32 }} role="main">
       <header style={{ marginBottom: 32, textAlign: "center" }}>
         <h1 style={{ fontSize: 48, margin: 0, color: "#0f172a", fontWeight: 800 }}>MANDATE</h1>
         <p style={{ color: "#64748b", marginTop: 12, fontSize: 18 }}>Human-backed charter layer for autonomous AI agents</p>
@@ -191,9 +192,9 @@ export default function Dashboard() {
       )}
 
       <div className="main-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 24 }}>
-        <div>
+        <section>
           <h2 style={{ fontSize: 28, marginBottom: 20, color: "#0f172a", fontWeight: 700 }}>Create Charter</h2>
-          <div style={{ 
+          <form style={{ 
             background: "white", 
             borderRadius: 16, 
             padding: 24, 
@@ -202,12 +203,14 @@ export default function Dashboard() {
             flexDirection: "column", 
             gap: 16,
             boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-          }}>
+          }} onSubmit={(e) => e.preventDefault()}>
             <Input 
               label="Wallet address" 
               value={walletAddress} 
               onChange={setWalletAddress}
               placeholder="0x..."
+              id="wallet-address"
+              required
             />
 
             <Input 
@@ -215,6 +218,8 @@ export default function Dashboard() {
               value={domain} 
               onChange={setDomain}
               placeholder="e.g., inference"
+              id="domain"
+              required
             />
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
@@ -254,6 +259,8 @@ export default function Dashboard() {
                   type="button"
                   onClick={open}
                   disabled={isVerifying || !walletAddress || !walletAddress.startsWith("0x")}
+                  aria-label={isVerifying ? "Verifying World ID" : "Verify with World ID to create charter"}
+                  aria-busy={isVerifying}
                   style={{
                     background: isVerifying ? "#94a3b8" : "#2563eb",
                     color: "white",
@@ -301,13 +308,13 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </form>
+        </section>
 
-        <div>
+        <section aria-live="polite">
           <h2 style={{ fontSize: 28, marginBottom: 20, color: "#0f172a", fontWeight: 700 }}>Live Charter Feed</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {data?.charters?.map((c: any) => (
+            {data?.charters?.map((c: Charter) => (
               <CharterCard key={c.id} charter={c} />
             ))}
             {(!data?.charters || data.charters.length === 0) && (
