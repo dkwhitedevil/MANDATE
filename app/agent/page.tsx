@@ -99,7 +99,7 @@ export default function AgentDemoPage() {
     <main style={{ minHeight: "100vh", background: "#020817", color: "#a7f3d0", fontFamily: "monospace", padding: 32 }}>
       <h1 style={{ color: "white", fontSize: 32, marginBottom: 32 }}>MANDATE Agent Demo</h1>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+      <div className="agent-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <label style={{ display: "block", color: "#9ca3af", marginBottom: 8 }}>Charter ID</label>

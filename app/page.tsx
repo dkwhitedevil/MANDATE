@@ -3,6 +3,9 @@
 import { IDKitWidget, type ISuccessResult } from "@worldcoin/idkit";
 import { gql, request } from "graphql-request";
 import { useEffect, useState } from "react";
+import { StatCard } from "../components/StatCard";
+import { CharterCard } from "../components/CharterCard";
+import { Input } from "../components/Input";
 
 const STATS_QUERY = gql`
   query {
@@ -35,11 +38,13 @@ export default function Dashboard() {
   const [durationDays, setDurationDays] = useState<string>("7");
   const [isVerifying, setIsVerifying] = useState(false);
   const [mintResult, setMintResult] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
 
     async function fetchData() {
+      setIsLoading(true);
       const subgraphUrl = process.env.NEXT_PUBLIC_SUBGRAPH_URL;
       const isConfigured = !!subgraphUrl && !subgraphUrl.includes("...");
 
@@ -47,6 +52,7 @@ export default function Dashboard() {
         if (active) {
           setStatus("Subgraph not configured yet. Add a live NEXT_PUBLIC_SUBGRAPH_URL to connect the dashboard.");
           setData(null);
+          setIsLoading(false);
         }
         return;
       }
@@ -56,12 +62,14 @@ export default function Dashboard() {
         if (active) {
           setData(result);
           setStatus("");
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Dashboard subgraph error:", error);
         if (active) {
           setStatus("The configured Subgraph is unavailable or not indexed yet.");
           setData(null);
+          setIsLoading(false);
         }
       }
     }
@@ -133,20 +141,48 @@ export default function Dashboard() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "#f3f4f6", padding: 32 }}>
-      <header style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 40, margin: 0 }}>MANDATE</h1>
-        <p style={{ color: "#4b5563", marginTop: 8 }}>Human-backed charter layer for autonomous AI agents</p>
+    <main style={{ minHeight: "100vh", background: "#f8fafc", padding: 32 }}>
+      <header style={{ marginBottom: 32, textAlign: "center" }}>
+        <h1 style={{ fontSize: 48, margin: 0, color: "#0f172a", fontWeight: 800 }}>MANDATE</h1>
+        <p style={{ color: "#64748b", marginTop: 12, fontSize: 18 }}>Human-backed charter layer for autonomous AI agents</p>
       </header>
 
+      {isLoading && !status && (
+        <div style={{ 
+          marginBottom: 24, 
+          background: "#f1f5f9", 
+          border: "1px solid #cbd5e1", 
+          color: "#64748b", 
+          borderRadius: 12, 
+          padding: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 8
+        }}>
+          <span style={{ fontSize: 18 }}>⏳</span>
+          Loading dashboard data...
+        </div>
+      )}
+
       {status && (
-        <div style={{ marginBottom: 24, background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a4d00", borderRadius: 12, padding: 12 }}>
+        <div style={{ 
+          marginBottom: 24, 
+          background: status.includes("success") ? "#ecfdf5" : "#fff7ed", 
+          border: status.includes("success") ? "1px solid #a7f3d0" : "1px solid #fed7aa", 
+          color: status.includes("success") ? "#065f46" : "#9a4d00", 
+          borderRadius: 12, 
+          padding: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 8
+        }}>
+          <span style={{ fontSize: 18 }}>{status.includes("success") ? "✓" : "⚠"}</span>
           {status}
         </div>
       )}
 
       {data?.charterStats && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 28 }}>
+        <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 28 }}>
           <StatCard label="Total Charters" value={data.charterStats.totalCharters} />
           <StatCard label="Active Charters" value={data.charterStats.activeCharters} />
           <StatCard label="Total Executions" value={data.charterStats.totalExecutions} />
@@ -154,53 +190,51 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 24 }}>
+      <div className="main-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 24 }}>
         <div>
-          <h2 style={{ fontSize: 24, marginBottom: 16 }}>Create Charter</h2>
-          <div style={{ background: "white", borderRadius: 16, padding: 20, border: "1px solid #e5e7eb", display: "flex", flexDirection: "column", gap: 12 }}>
-            <label style={{ display: "flex", flexDirection: "column", gap: 6, color: "#374151" }}>
-              Wallet address
-              <input
-                value={walletAddress}
-                onChange={(e) => setWalletAddress(e.target.value)}
-                placeholder="0x..."
-                style={{ border: "1px solid #d1d5db", borderRadius: 8, padding: "10px 12px" }}
-              />
-            </label>
+          <h2 style={{ fontSize: 28, marginBottom: 20, color: "#0f172a", fontWeight: 700 }}>Create Charter</h2>
+          <div style={{ 
+            background: "white", 
+            borderRadius: 16, 
+            padding: 24, 
+            border: "1px solid #e5e7eb", 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 16,
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+          }}>
+            <Input 
+              label="Wallet address" 
+              value={walletAddress} 
+              onChange={setWalletAddress}
+              placeholder="0x..."
+            />
 
-            <label style={{ display: "flex", flexDirection: "column", gap: 6, color: "#374151" }}>
-              Domain
-              <input
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                style={{ border: "1px solid #d1d5db", borderRadius: 8, padding: "10px 12px" }}
-              />
-            </label>
+            <Input 
+              label="Domain" 
+              value={domain} 
+              onChange={setDomain}
+              placeholder="e.g., inference"
+            />
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-              <label style={{ display: "flex", flexDirection: "column", gap: 6, color: "#374151" }}>
-                Budget (HBAR)
-                <input
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  value={budgetHbar}
-                  onChange={(e) => setBudgetHbar(e.target.value)}
-                  style={{ border: "1px solid #d1d5db", borderRadius: 8, padding: "10px 12px" }}
-                />
-              </label>
+              <Input 
+                label="Budget (HBAR)" 
+                value={budgetHbar} 
+                onChange={setBudgetHbar}
+                type="number"
+                min="0.1"
+                step="0.1"
+              />
 
-              <label style={{ display: "flex", flexDirection: "column", gap: 6, color: "#374151" }}>
-                Duration (days)
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={durationDays}
-                  onChange={(e) => setDurationDays(e.target.value)}
-                  style={{ border: "1px solid #d1d5db", borderRadius: 8, padding: "10px 12px" }}
-                />
-              </label>
+              <Input 
+                label="Duration (days)" 
+                value={durationDays} 
+                onChange={setDurationDays}
+                type="number"
+                min="1"
+                step="1"
+              />
             </div>
 
             <IDKitWidget
@@ -221,13 +255,26 @@ export default function Dashboard() {
                   onClick={open}
                   disabled={isVerifying || !walletAddress || !walletAddress.startsWith("0x")}
                   style={{
-                    background: isVerifying ? "#9ca3af" : "#2563eb",
+                    background: isVerifying ? "#94a3b8" : "#2563eb",
                     color: "white",
                     border: "none",
-                    borderRadius: 10,
-                    padding: "12px 16px",
+                    borderRadius: 12,
+                    padding: "14px 20px",
                     fontWeight: 700,
-                    cursor: isVerifying ? "not-allowed" : "pointer"
+                    fontSize: 16,
+                    cursor: isVerifying ? "not-allowed" : "pointer",
+                    transition: "background 0.2s, transform 0.1s",
+                    boxShadow: "0 4px 6px -1px rgba(37, 99, 235, 0.3)"
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isVerifying && walletAddress && walletAddress.startsWith("0x")) {
+                      e.currentTarget.style.background = "#1d4ed8";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = isVerifying ? "#94a3b8" : "#2563eb";
+                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
                   {isVerifying ? "Verifying..." : "Verify with World ID"}
@@ -236,62 +283,48 @@ export default function Dashboard() {
             </IDKitWidget>
 
             {mintResult && (
-              <div style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 10, padding: 12, color: "#065f46" }}>
-                <strong>Charter minted.</strong>
-                <div>Tx: {mintResult.txHash}</div>
-                <div>Charter ID: {mintResult.charterId}</div>
+              <div style={{ 
+                background: "#ecfdf5", 
+                border: "1px solid #a7f3d0", 
+                borderRadius: 12, 
+                padding: 16, 
+                color: "#065f46",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 20 }}>🎉</span>
+                  <strong style={{ fontSize: 16 }}>Charter minted successfully!</strong>
+                </div>
+                <div style={{ fontSize: 14, marginTop: 8 }}>
+                  <div><strong>Transaction:</strong> {mintResult.txHash}</div>
+                  <div><strong>Charter ID:</strong> {mintResult.charterId}</div>
+                </div>
               </div>
             )}
           </div>
         </div>
 
         <div>
-          <h2 style={{ fontSize: 24, marginBottom: 16 }}>Live Charter Feed</h2>
+          <h2 style={{ fontSize: 28, marginBottom: 20, color: "#0f172a", fontWeight: 700 }}>Live Charter Feed</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {data?.charters?.map((c: any) => (
               <CharterCard key={c.id} charter={c} />
             ))}
+            {(!data?.charters || data.charters.length === 0) && (
+              <div style={{ 
+                background: "white", 
+                borderRadius: 12, 
+                padding: 24, 
+                border: "1px solid #e5e7eb",
+                textAlign: "center",
+                color: "#6b7280"
+              }}>
+                No active charters yet. Create one to get started!
+              </div>
+            )}
           </div>
         </div>
       </div>
     </main>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: any }) {
-  return (
-    <div style={{ background: "white", borderRadius: 16, padding: 20, border: "1px solid #e5e7eb" }}>
-      <div style={{ fontSize: 28, fontWeight: 700 }}>{value}</div>
-      <div style={{ color: "#6b7280" }}>{label}</div>
-    </div>
-  );
-}
-
-function CharterCard({ charter }: { charter: any }) {
-  const remaining = parseInt(charter.remainingHbar) / 1e8;
-  const total = parseInt(charter.budgetHbar) / 1e8;
-  const pct = total > 0 ? (remaining / total) * 100 : 0;
-
-  return (
-    <div style={{ background: "white", borderRadius: 12, padding: 16, border: "1px solid #e5e7eb" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <strong>#{charter.id}</strong>
-          <span style={{ marginLeft: 8, color: "#6b7280" }}>{charter.domain}</span>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontWeight: 700 }}>{charter.reputation}/100</div>
-          <div style={{ fontSize: 12, color: "#6b7280" }}>reputation</div>
-        </div>
-      </div>
-      <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6b7280" }}>
-        <span>{remaining.toFixed(4)} HBAR remaining</span>
-        <span>{pct.toFixed(0)}%</span>
-      </div>
-      <div style={{ width: "100%", height: 8, background: "#e5e7eb", borderRadius: 999, marginTop: 6 }}>
-        <div style={{ width: `${pct}%`, height: 8, background: "#2563eb", borderRadius: 999 }} />
-      </div>
-      <div style={{ marginTop: 8, fontSize: 12, color: "#6b7280" }}>{charter.executionCount} executions</div>
-    </div>
   );
 }
