@@ -2,15 +2,16 @@
 
 import { gql, request } from "graphql-request";
 import { useEffect, useState } from "react";
+import { Charter } from "../../types";
 
 export default function AgentDemoPage() {
   const [charterId, setCharterId] = useState("");
   const [task, setTask] = useState("Research the current state of AI agent payment protocols");
   const [logs, setLogs] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
-  const [charterState, setCharterState] = useState<any>(null);
+  const [charterState, setCharterState] = useState<Charter | null>(null);
 
-  async function fetchCharterState(id: string) {
+  async function fetchCharterState(id: string): Promise<void> {
     if (!id) return;
     const query = gql`
       query GetCharter($id: ID!) {
@@ -62,7 +63,7 @@ export default function AgentDemoPage() {
     };
   }, [charterId]);
 
-  async function runAgent() {
+  async function runAgent(): Promise<void> {
     setRunning(true);
     setLogs([]);
 
