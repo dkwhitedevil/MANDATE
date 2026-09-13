@@ -1,0 +1,13 @@
+[store]
+
+[database]
+  connection = "postgresql://graph:letmein@postgres:5432/graph"
+
+[general]
+  [general.chain]
+
+[chains]
+  [chains.hedera-testnet]
+    network = "hedera-testnet"
+    shard = "0"
+    provider = ["https://testnet.hashio.io/api"]

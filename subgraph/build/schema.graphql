@@ -1,0 +1,55 @@
+type Charter @entity {
+  id: ID!
+  owner: Bytes!
+  worldNullifier: Bytes!
+  domain: String!
+  budgetTinybars: BigInt!
+  usedTinybars: BigInt!
+  remainingTinybars: BigInt!
+  budgetHbar: BigInt!
+  usedHbar: BigInt!
+  remainingHbar: BigInt!
+  expiresAt: BigInt!
+  tier: Int!
+  active: Boolean!
+  createdAt: BigInt!
+  createdTxHash: Bytes!
+  reputation: Int!
+  executionCount: Int!
+  executions: [Execution!]! @derivedFrom(field: "charter")
+}
+
+type Execution @entity {
+  id: ID!
+  charter: Charter!
+  serviceAddress: Bytes!
+  amountTinybars: BigInt!
+  amountHbar: BigInt!
+  domain: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  paymentTxHash: Bytes!
+}
+
+type Service @entity {
+  id: ID!
+  name: String
+  domain: String!
+  pricePerQueryTinybars: BigInt!
+  pricePerQueryHbar: BigInt!
+  totalExecutions: Int!
+  totalRevenueTinybars: BigInt!
+  totalRevenueHbar: BigInt!
+  reputation: Int!
+  active: Boolean!
+  registeredAt: BigInt!
+}
+
+type CharterStats @entity {
+  id: ID!
+  totalCharters: Int!
+  activeCharters: Int!
+  totalExecutions: Int!
+  totalVolumeTinybars: BigInt!
+  totalVolumeHbar: BigInt!
+}
