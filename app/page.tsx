@@ -147,7 +147,7 @@ export default function Dashboard() {
         <p style={{ color: "#64748b", marginTop: 12, fontSize: 18 }}>Human-backed charter layer for autonomous AI agents</p>
       </header>
 
-      {isLoading && !status && (
+      {isLoading && (
         <div style={{ 
           marginBottom: 24, 
           background: "#f1f5f9", 
