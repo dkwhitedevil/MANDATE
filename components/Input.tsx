@@ -6,19 +6,29 @@ interface InputProps {
   type?: string;
   min?: number;
   step?: number;
+  id?: string;
+  required?: boolean;
 }
 
-export function Input({ label, value, onChange, placeholder, type = "text", min, step }: InputProps) {
+export function Input({ label, value, onChange, placeholder, type = "text", min, step, id, required }: InputProps) {
+  const inputId = id || label.toLowerCase().replace(/\s+/g, '-');
+  
   return (
-    <label style={{ display: "flex", flexDirection: "column", gap: 6, color: "#374151", fontSize: 14 }}>
-      {label}
+    <label style={{ display: "flex", flexDirection: "column", gap: 6, color: "#374151", fontSize: 14 }} htmlFor={inputId}>
+      <span>
+        {label}
+        {required && <span style={{ color: "#ef4444", marginLeft: 2 }} aria-hidden="true">*</span>}
+      </span>
       <input
+        id={inputId}
         type={type}
         min={min}
         step={step}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        required={required}
+        aria-label={label}
         style={{ 
           border: "1px solid #d1d5db", 
           borderRadius: 8, 

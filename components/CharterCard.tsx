@@ -1,13 +1,4 @@
-interface Charter {
-  id: string;
-  domain: string;
-  budgetHbar: string;
-  usedHbar: string;
-  remainingHbar: string;
-  reputation: string;
-  tier: string;
-  executionCount: string;
-}
+import { Charter } from "../types";
 
 interface CharterCardProps {
   charter: Charter;
